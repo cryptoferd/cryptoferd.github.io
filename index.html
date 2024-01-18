@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAINBOWINATOR</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  
+<!-- Add these elements for wallet info and disconnect button -->
+<div id="walletInfoContainer">
+  <span id="walletAddress"></span>
+  <span id="walletNetwork"></span>
+  <span id="walletBalance"></span>
+  <button id="disconnectWalletButton">Disconnect Wallet</button>
+</div>
+
+<div class="container">
+    <h1>RAINBOWINATOR</h1>
+    <input type="file" id="imageInput" accept="image/png, image/gif">
+    <div id="imagePreview"></div>
+    <button id="rainbowizeButton">RAINBOWIZE</button>
+    <!-- Add the following line for the Ethscribe button -->
+   
+
+
+
+    <!-- Color picker inputs -->
+    <label for="color1">Color 1:</label>
+    <input type="color" id="color1" class="color-picker" value="#ff0000">
+
+    <label for="color2">Color 2:</label>
+    <input type="color" id="color2" class="color-picker" value="#ffa500">
+
+    <label for="color3">Color 3:</label>
+    <input type="color" id="color3" class="color-picker" value="#ffff00">
+
+    <label for="color4">Color 4:</label>
+    <input type="color" id="color4" class="color-picker" value="#008000">
+
+    <label for="color5">Color 5:</label>
+    <input type="color" id="color5" class="color-picker" value="#0000ff">
+
+    <label for="color6">Color 6:</label>
+    <input type="color" id="color6" class="color-picker" value="#4b0082">
+
+    <label for="color7">Color 7:</label>
+    <input type="color" id="color7" class="color-picker" value="#ee82ee">
+
+    <div id="resultContainer"></div>
+
+
+<!-- Add the following line for the Ethscribe button -->
+<button id="ethscribeButton">Ethscribe Rainbowized Ethscription</button>
+
+
+    <!-- Connect Wallet Button -->
+    <button id="connectWalletButton">Connect Wallet</button>
+  </div>
+
+
+
+
+  <!-- Use the latest version of WalletConnect -->
+ <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+
+
+
+  <!-- Include the latest version of your script.js -->
+  <script type="module" src="script.js"></script>
+
+</body>
+</html>
