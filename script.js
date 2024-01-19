@@ -267,27 +267,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function fetchAndDisplayImages() {
-    const ethscribeContract = new web3.eth.Contract(ethscribeAbi, ethscribeAddress);
+  const ethscribeContract = new web3.eth.Contract(ethscribeAbi, ethscribeAddress);
 
-    try {
-      // Get the total number of ethscriptions
-      const totalEthscriptions = await ethscribeContract.methods.getTotalEthscriptions().call();
-      console.log('Total Ethscriptions:', totalEthscriptions);
+  try {
+    // Get the total number of ethscriptions
+    const totalEthscriptions = await ethscribeContract.methods.getTotalEthscriptions().call();
+    console.log('Total Ethscriptions:', totalEthscriptions);
 
-      // Fetch each ethscription and display in a grid
-      const imagesData = [];
-      for (let i = 0; i < totalEthscriptions; i++) {
-        const ethscriptionData = await ethscribeContract.methods.getEthscription(i).call();
-        imagesData.push(ethscriptionData);
-      }
-
-      // Display images in the grid
-      displayImagesInGrid(imagesData);
-    } catch (error) {
-      console.error('Error fetching and displaying images:', error);
-      alert('Error fetching and displaying images. Please try again.');
+    // Fetch each ethscription and display in a grid
+    const imagesData = [];
+    for (let i = 0; i < totalEthscriptions; i++) {
+      const ethscriptionData = await ethscribeContract.methods.getEthscription(i).call();
+      imagesData.push(ethscriptionData);
     }
+
+    // Display images in the grid
+    displayImagesInGrid(imagesData);
+  } catch (error) {
+    console.error('Error fetching and displaying images:', error);
+    alert('Error fetching and displaying images. Please try again.');
   }
+}
+
 
   // Updated function to display images in a grid
   function displayImagesInGrid(imagesData) {
