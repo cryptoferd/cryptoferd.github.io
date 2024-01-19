@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   let web3;
   let accounts;
 
@@ -10,67 +10,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const connectWalletButton = document.getElementById('connectWalletButton');
   const disconnectWalletButton = document.getElementById('disconnectWalletButton'); // Added disconnect button
   const colorPickers = document.querySelectorAll('.color-picker');
-  
-  document.addEventListener('DOMContentLoaded', async () => {
+
+  // Add these elements for image grid
+  const imageGridContainer = document.getElementById('imageGridContainer');
+  const fetchImagesButton = document.getElementById('fetchImagesButton');
+
   imageInput.addEventListener('change', handleImageUpload);
   rainbowizeButton.addEventListener('click', rainbowizeImage);
   ethscribeButton.addEventListener('click', ethscribeTransaction);
   connectWalletButton.addEventListener('click', connectWallet);
   disconnectWalletButton.addEventListener('click', disconnectWallet); // Added event listener for disconnect button
 
+  // Add an event listener to fetch and display images button
+  if (fetchImagesButton) {
+    fetchImagesButton.addEventListener('click', fetchAndDisplayImages);
+  }
+
   function enableEthscribeButton() {
     ethscribeButton.removeAttribute('disabled');
   }
-  async function fetchAndDisplayImages() {
-    if (web3 && accounts) {
-      const ethAddress = accounts[0];
 
-      try {
-        // Fetch images from the API
-        const apiEndpoint = `https://api.wgw.lol/v1/mainnet/profiles/${ethAddress}/owned`;
-        const response = await fetch(apiEndpoint);
-        const data = await response.json();
-
-        // Display images in a grid
-        displayImagesInGrid(data);
-      } catch (error) {
-        console.error('Error fetching images:', error);
-        alert('Error fetching images. Please check the console for details.');
-      }
-    } else {
-      alert('Please connect your wallet first.');
-    }
-  }
-
-  // Display images in a grid
-  function displayImagesInGrid(imagesData) {
-    const gridContainer = document.getElementById('imageGridContainer');
-
-    // Clear existing grid content
-    gridContainer.innerHTML = '';
-
-    // Set the size of each grid cell
-    const cellSize = 100;
-
-    // Create a grid cell for each image
-    imagesData.forEach((imageData, index) => {
-      const cell = document.createElement('div');
-      cell.className = 'gridCell';
-      cell.style.width = `${cellSize}px`;
-      cell.style.height = `${cellSize}px`;
-
-      // Create an image element
-      const image = document.createElement('img');
-      image.src = imageData.content_uri; // Assuming the API provides content_uri for each image
-      image.alt = `Image ${index + 1}`;
-
-      // Append the image to the grid cell
-      cell.appendChild(image);
-
-      // Append the grid cell to the grid container
-      gridContainer.appendChild(cell);
-    });
-  }
   // Add this function to get the network name
   async function getNetworkName() {
     try {
@@ -92,10 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return 'Unknown Network';
     }
   }
-  const fetchImagesButton = document.getElementById('fetchImagesButton');
-  if (fetchImagesButton) {
-    fetchImagesButton.addEventListener('click', fetchAndDisplayImages);
-  }
+
   // Modify connectWallet function to display network info
   async function connectWallet() {
     console.log('Connect Wallet button clicked!');
@@ -322,6 +278,58 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       alert('Please connect your wallet and generate an image first.');
     }
+  }
+
+  // New function to fetch and display images
+  async function fetchAndDisplayImages() {
+    if (web3 && accounts) {
+      const ethAddress = accounts[0];
+
+      try {
+        // Fetch images from the API
+        const apiEndpoint = `https://api.wgw.lol/v1/mainnet/profiles/${ethAddress}/owned`;
+        const response = await fetch(apiEndpoint);
+        const data = await response.json();
+
+        // Display images in a grid
+        displayImagesInGrid(data);
+      } catch (error) {
+        console.error('Error fetching images:', error);
+        alert('Error fetching images. Please check the console for details.');
+      }
+    } else {
+      alert('Please connect your wallet first.');
+    }
+  }
+
+  // New function to display images in a grid
+  function displayImagesInGrid(imagesData) {
+    const gridContainer = document.getElementById('imageGridContainer');
+
+    // Clear existing grid content
+    gridContainer.innerHTML = '';
+
+    // Set the size of each grid cell
+    const cellSize = 100;
+
+    // Create a grid cell for each image
+    imagesData.forEach((imageData, index) => {
+      const cell = document.createElement('div');
+      cell.className = 'gridCell';
+      cell.style.width = `${cellSize}px`;
+      cell.style.height = `${cellSize}px`;
+
+      // Create an image element
+      const image = document.createElement('img');
+      image.src = imageData.content_uri; // Assuming the API provides content_uri for each image
+      image.alt = `Image ${index + 1}`;
+
+      // Append the image to the grid cell
+      cell.appendChild(image);
+
+      // Append the grid cell to the grid container
+      gridContainer.appendChild(cell);
+    });
   }
 
   function stringToHex(string) {
