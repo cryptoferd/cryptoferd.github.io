@@ -13,10 +13,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Add these elements for image grid
   const imageGridContainer = document.getElementById('imageGridContainer');
-const fetchImagesButton = document.getElementById('fetchImagesButton');
-if (fetchImagesButton) {
-  fetchImagesButton.addEventListener('click', fetchAndDisplayImages);
-}
+  const fetchImagesButton = document.getElementById('fetchImagesButton');
+  if (fetchImagesButton) {
+   fetchImagesButton.addEventListener('click', fetchAndDisplayImages);
+  }
 
 
   imageInput.addEventListener('change', handleImageUpload);
