@@ -281,26 +281,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // New function to fetch and display images
-  async function fetchAndDisplayImages() {
-    if (web3 && accounts) {
-      const ethAddress = accounts[0];
+async function fetchAndDisplayImages() {
+  console.log('Fetching and displaying images...');
+  if (web3 && accounts) {
+    const ethAddress = accounts[0];
 
-      try {
-        // Fetch images from the API
-        const apiEndpoint = `https://api.wgw.lol/v1/mainnet/profiles/${ethAddress}/owned`;
-        const response = await fetch(apiEndpoint);
-        const data = await response.json();
+    try {
+      // Fetch images from the API
+      const apiEndpoint = `https://api.wgw.lol/v1/mainnet/profiles/${ethAddress}/owned`;
+      const response = await fetch(apiEndpoint);
+      const data = await response.json();
 
-        // Display images in a grid
-        displayImagesInGrid(data);
-      } catch (error) {
-        console.error('Error fetching images:', error);
-        alert('Error fetching images. Please check the console for details.');
-      }
-    } else {
-      alert('Please connect your wallet first.');
+      // Display images in a grid
+      displayImagesInGrid(data);
+    } catch (error) {
+      console.error('Error fetching images:', error);
+      alert('Error fetching images. Please check the console for details.');
     }
+  } else {
+    alert('Please connect your wallet first.');
   }
+}
+
 
   // New function to display images in a grid
   function displayImagesInGrid(imagesData) {
