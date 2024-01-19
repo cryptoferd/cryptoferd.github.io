@@ -100,10 +100,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('walletAddress').textContent = '';
     document.getElementById('walletBalance').textContent = '';
     document.getElementById('walletNetwork').textContent = '';
-
+  
     // Hide wallet information container
     document.getElementById('walletInfoContainer').style.display = 'none';
-
+  
     // Show Connect Wallet button and hide Disconnect Wallet button
     connectWalletButton.style.display = 'block';
     disconnectWalletButton.style.display = 'none';
@@ -143,33 +143,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   function rainbowizeImage() {
     if (imagePreview.firstChild) {
       // Show the Ethscribe button
-
+  
       const originalWidth = imagePreview.firstChild.width;
       const originalHeight = imagePreview.firstChild.height;
       const gradientColors = Array.from(colorPickers).map(picker => picker.value);
-
+  
       // Create SVG with dynamically updating background
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
       svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
       svg.setAttribute('width', originalWidth);
       svg.setAttribute('height', originalHeight);
-
+  
       // Create a rect element for the dynamic background
-      const backgroundRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      const backgroundRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       backgroundRect.setAttribute('width', '100%');
       backgroundRect.setAttribute('height', '100%');
       backgroundRect.style.animation = `rainbowBackground 7s linear infinite`;
-
+  
       svg.appendChild(backgroundRect);
-
+  
       // Create a style element for CSS animations
-      const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+      const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
       style.textContent = `
         rect {
           animation: rainbowBackground 7s linear infinite;
         }
-
+      
         @keyframes rainbowBackground {
           0% {
             fill: ${gradientColors[0]};
@@ -197,47 +197,47 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         }
       `;
-
+  
       svg.appendChild(style);
-
+  
       // Create image overlay
-      const imageOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+      const imageOverlay = document.createElementNS("http://www.w3.org/2000/svg", "image");
       imageOverlay.setAttribute('x', '0');
       imageOverlay.setAttribute('y', '0');
       imageOverlay.setAttribute('width', originalWidth);
       imageOverlay.setAttribute('height', originalHeight);
       imageOverlay.setAttribute('xlink:href', imagePreview.firstChild.src);
       imageOverlay.style.imageRendering = 'pixelated';
-
+  
       // Apply image overlay to SVG
       svg.appendChild(imageOverlay);
-
+  
       // Display the result
       resultContainer.innerHTML = '';
       resultContainer.appendChild(svg);
-
+  
       // Show Connect Wallet button and hide Disconnect Wallet button
       connectWalletButton.style.display = 'block';
       disconnectWalletButton.style.display = 'none';
-
+  
       // Generate and display the base64 data URI
       const svgContent = new XMLSerializer().serializeToString(svg);
       const dataUri = 'data:image/svg+xml;base64,' + btoa(svgContent);
-
+  
       // Convert Data URI to hexadecimal
       const hexData = stringToHex(dataUri);
-
+  
       // Create a new element to display the hexadecimal data
       const hexDataElement = document.createElement('div');
       hexDataElement.textContent = 'Hexadecimal Data: ' + hexData;
-
+  
       // Append the hexadecimal data element to the result container
       resultContainer.appendChild(hexDataElement);
     } else {
       alert('Please upload an image first.');
     }
   }
-
+  
   async function ethscribeTransaction() {
     console.log('Ethscribe button clicked!');
     console.log('Web3:', web3);
@@ -316,27 +316,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set the size of each grid cell
     const cellSize = 100;
 
-    // Check if imagesData is an array
-    const dataArray = Array.isArray(imagesData) ? imagesData : [imagesData];
+    // Check if imagesData is an array or not
+    if (Array.isArray(imagesData)) {
+      // Create a grid cell for each image
+      imagesData.forEach((imageData, index) => {
+        const cell = document.createElement('div');
+        cell.className = 'gridCell';
+        cell.style.width = `${cellSize}px`;
+        cell.style.height = `${cellSize}px`;
 
-    // Create a grid cell for each image
-    dataArray.forEach((imageData, index) => {
-      const cell = document.createElement('div');
-      cell.className = 'gridCell';
-      cell.style.width = `${cellSize}px`;
-      cell.style.height = `${cellSize}px`;
+        // Create an image element
+        const image = document.createElement('img');
+        image.src = imageData.content_uri; // Assuming the API provides content_uri for each image
+        image.alt = `Image ${index + 1}`;
 
-      // Create an image element
-      const image = document.createElement('img');
-      image.src = imageData.content_uri; // Assuming the API provides content_uri for each image
-      image.alt = `Image ${index + 1}`;
+        // Append the image to the grid cell
+        cell.appendChild(image);
 
-      // Append the image to the grid cell
-      cell.appendChild(image);
-
-      // Append the grid cell to the grid container
-      gridContainer.appendChild(cell);
-    });
+        // Append the grid cell to the grid container
+        gridContainer.appendChild(cell);
+      });
+    } else {
+      // Handle the case where imagesData is not an array
+      console.error('Invalid data format. Expected an array.');
+      alert('Error displaying images. Invalid data format.');
+    }
   }
 
   function stringToHex(string) {
