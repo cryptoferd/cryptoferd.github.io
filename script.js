@@ -15,9 +15,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const imageGridContainer = document.getElementById('imageGridContainer');
   const fetchImagesButton = document.getElementById('fetchImagesButton');
   if (fetchImagesButton) {
-   fetchImagesButton.addEventListener('click', fetchAndDisplayImages);
+    fetchImagesButton.addEventListener('click', fetchAndDisplayImages);
   }
-
 
   imageInput.addEventListener('change', handleImageUpload);
   rainbowizeButton.addEventListener('click', rainbowizeImage);
@@ -101,10 +100,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('walletAddress').textContent = '';
     document.getElementById('walletBalance').textContent = '';
     document.getElementById('walletNetwork').textContent = '';
-  
+
     // Hide wallet information container
     document.getElementById('walletInfoContainer').style.display = 'none';
-  
+
     // Show Connect Wallet button and hide Disconnect Wallet button
     connectWalletButton.style.display = 'block';
     disconnectWalletButton.style.display = 'none';
@@ -144,33 +143,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   function rainbowizeImage() {
     if (imagePreview.firstChild) {
       // Show the Ethscribe button
-  
+
       const originalWidth = imagePreview.firstChild.width;
       const originalHeight = imagePreview.firstChild.height;
       const gradientColors = Array.from(colorPickers).map(picker => picker.value);
-  
+
       // Create SVG with dynamically updating background
-      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
       svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
       svg.setAttribute('width', originalWidth);
       svg.setAttribute('height', originalHeight);
-  
+
       // Create a rect element for the dynamic background
-      const backgroundRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      const backgroundRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       backgroundRect.setAttribute('width', '100%');
       backgroundRect.setAttribute('height', '100%');
       backgroundRect.style.animation = `rainbowBackground 7s linear infinite`;
-  
+
       svg.appendChild(backgroundRect);
-  
+
       // Create a style element for CSS animations
-      const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+      const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
       style.textContent = `
         rect {
           animation: rainbowBackground 7s linear infinite;
         }
-      
+
         @keyframes rainbowBackground {
           0% {
             fill: ${gradientColors[0]};
@@ -198,47 +197,47 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         }
       `;
-  
+
       svg.appendChild(style);
-  
+
       // Create image overlay
-      const imageOverlay = document.createElementNS("http://www.w3.org/2000/svg", "image");
+      const imageOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'image');
       imageOverlay.setAttribute('x', '0');
       imageOverlay.setAttribute('y', '0');
       imageOverlay.setAttribute('width', originalWidth);
       imageOverlay.setAttribute('height', originalHeight);
       imageOverlay.setAttribute('xlink:href', imagePreview.firstChild.src);
       imageOverlay.style.imageRendering = 'pixelated';
-  
+
       // Apply image overlay to SVG
       svg.appendChild(imageOverlay);
-  
+
       // Display the result
       resultContainer.innerHTML = '';
       resultContainer.appendChild(svg);
-  
+
       // Show Connect Wallet button and hide Disconnect Wallet button
       connectWalletButton.style.display = 'block';
       disconnectWalletButton.style.display = 'none';
-  
+
       // Generate and display the base64 data URI
       const svgContent = new XMLSerializer().serializeToString(svg);
       const dataUri = 'data:image/svg+xml;base64,' + btoa(svgContent);
-  
+
       // Convert Data URI to hexadecimal
       const hexData = stringToHex(dataUri);
-  
+
       // Create a new element to display the hexadecimal data
       const hexDataElement = document.createElement('div');
       hexDataElement.textContent = 'Hexadecimal Data: ' + hexData;
-  
+
       // Append the hexadecimal data element to the result container
       resultContainer.appendChild(hexDataElement);
     } else {
       alert('Please upload an image first.');
     }
   }
-  
+
   async function ethscribeTransaction() {
     console.log('Ethscribe button clicked!');
     console.log('Web3:', web3);
@@ -285,28 +284,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // New function to fetch and display images
-async function fetchAndDisplayImages() {
-console.log('Fetching and displaying images...');
-  if (web3 && accounts) {
-    const ethAddress = accounts[0];
+  async function fetchAndDisplayImages() {
+    console.log('Fetching and displaying images...');
+    if (web3 && accounts) {
+      const ethAddress = accounts[0];
 
-    try {
-      // Fetch images from the API
-      const apiEndpoint = `https://api.wgw.lol/v1/mainnet/profiles/${ethAddress}/owned`;
-      const response = await fetch(apiEndpoint);
-      const data = await response.json();
+      try {
+        // Fetch images from the API
+        const apiEndpoint = `https://api.wgw.lol/v1/mainnet/profiles/${ethAddress}/owned`;
+        const response = await fetch(apiEndpoint);
+        const data = await response.json();
 
-      // Display images in a grid
-      displayImagesInGrid(data);
-    } catch (error) {
-      console.error('Error fetching images:', error);
-      alert('Error fetching images. Please check the console for details.');
+        // Display images in a grid
+        displayImagesInGrid(data);
+      } catch (error) {
+        console.error('Error fetching images:', error);
+        alert('Error fetching images. Please check the console for details.');
+      }
+    } else {
+      alert('Please connect your wallet first.');
     }
-  } else {
-    alert('Please connect your wallet first.');
   }
-}
-
 
   // New function to display images in a grid
   function displayImagesInGrid(imagesData) {
@@ -318,8 +316,11 @@ console.log('Fetching and displaying images...');
     // Set the size of each grid cell
     const cellSize = 100;
 
+    // Check if imagesData is an array
+    const dataArray = Array.isArray(imagesData) ? imagesData : [imagesData];
+
     // Create a grid cell for each image
-    imagesData.forEach((imageData, index) => {
+    dataArray.forEach((imageData, index) => {
       const cell = document.createElement('div');
       cell.className = 'gridCell';
       cell.style.width = `${cellSize}px`;
