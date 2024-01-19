@@ -1,7 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  let web3;
-  let accounts;
-
   const imageInput = document.getElementById('imageInput');
   const imagePreview = document.getElementById('imagePreview');
   const rainbowizeButton = document.getElementById('rainbowizeButton');
@@ -13,9 +10,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Add these elements for image grid
   const imageGridContainer = document.getElementById('imageGridContainer');
   const fetchImagesButton = document.getElementById('fetchImagesButton');
-  if (fetchImagesButton) {
-    fetchImagesButton.addEventListener('click', fetchAndDisplayImages);
-  }
 
   imageInput.addEventListener('change', handleImageUpload);
   rainbowizeButton.addEventListener('click', rainbowizeImage);
@@ -133,82 +127,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  async function connectWallet() {
+  function connectWallet() {
     console.log('Connect Wallet button clicked!');
-    if (window.ethereum || window.web3) {
-      try {
-        // Modern DApp browsers
-        if (window.ethereum) {
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-          web3 = new Web3(window.ethereum);
-        }
-        // Legacy dApp browsers
-        else if (window.web3) {
-          web3 = new Web3(window.web3.currentProvider);
-        }
-
-        accounts = await web3.eth.getAccounts();
-        const networkName = await getNetworkName();
-
-        // Display wallet address and network info
-        document.getElementById('walletAddress').textContent = `Wallet Address: ${accounts[0]}`;
-        document.getElementById('walletNetwork').textContent = `Network: ${networkName}`;
-        document.getElementById('walletInfoContainer').style.display = 'block';
-
-        // Hide Connect Wallet button and show Disconnect Wallet button
-        connectWalletButton.style.display = 'none';
-        disconnectWalletButton.style.display = 'block';
-      } catch (error) {
-        console.error(error);
-        alert('Error connecting to wallet. Please try again.');
-      }
-    } else {
-      alert('No Ethereum wallet found. Please install MetaMask or another wallet provider.');
-    }
+    // Your wallet connection logic goes here
+    // ...
   }
 
   function disconnectWallet() {
-    // Reset wallet information
-    document.getElementById('walletAddress').textContent = '';
-    document.getElementById('walletBalance').textContent = '';
-    document.getElementById('walletNetwork').textContent = '';
-
-    // Hide wallet information container
-    document.getElementById('walletInfoContainer').style.display = 'none';
-
-    // Show Connect Wallet button and hide Disconnect Wallet button
-    connectWalletButton.style.display = 'block';
-    disconnectWalletButton.style.display = 'none';
+    // Your wallet disconnection logic goes here
+    // ...
   }
 
-  // Function to handle image grid display
-  async function fetchAndDisplayImages() {
-    // Make API call to fetch data
-    const ethAddress = accounts[0]; // Assuming the connected wallet address is used
-    const apiUrl = `https://api.wgw.lol/v1/mainnet/profiles/${ethAddress}/owned`;
-
-    try {
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-
-      // Check if the response has the expected structure
-      if (data && data.total_count && data.data) {
-        // Get the total number of images
-        const totalImages = data.total_count;
-
-        // Fetched image data is available in data.data array
-        const imagesData = data.data;
-
-        // Display images in the grid
-        displayImagesInGrid(imagesData, totalImages);
-      } else {
-        console.error('Invalid API response format.');
-        alert('Error fetching and displaying images. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error fetching and displaying images:', error);
-      alert('Error fetching and displaying images. Please try again.');
-    }
+  // Function to fetch and display images
+  function fetchAndDisplayImages() {
+    // Your API call logic goes here
+    // ...
   }
 
   // Function to display images in the grid
@@ -263,28 +196,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const genericContent = document.createElement('div');
       genericContent.textContent = 'Unsupported Content Type';
       return genericContent;
-    }
-  }
-
-  // Function to get the network name
-  async function getNetworkName() {
-    try {
-      const networkId = await web3.eth.net.getId();
-      switch (networkId) {
-        case 1:
-          return 'Mainnet';
-        case 3:
-          return 'Ropsten Testnet';
-        case 4:
-          return 'Rinkeby Testnet';
-        case 42:
-          return 'Kovan Testnet';
-        default:
-          return 'Unknown Network';
-      }
-    } catch (error) {
-      console.error('Error getting network ID:', error);
-      return 'Unknown Network';
     }
   }
 });
