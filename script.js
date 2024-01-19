@@ -267,28 +267,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function fetchAndDisplayImages() {
-  const ethscribeContract = new web3.eth.Contract(ethscribeAbi, ethscribeAddress);
+    try {
+      // Fetch data from the API using the current connected wallet address
+      const ethAddress = accounts[0]; // Assuming accounts[0] contains the current connected wallet address
+      const apiUrl = `https://api.wgw.lol/v1/mainnet/profiles/${ethAddress}/owned`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
 
-  try {
-    // Get the total number of ethscriptions
-    const totalEthscriptions = await ethscribeContract.methods.getTotalEthscriptions().call();
-    console.log('Total Ethscriptions:', totalEthscriptions);
-
-    // Fetch each ethscription and display in a grid
-    const imagesData = [];
-    for (let i = 0; i < totalEthscriptions; i++) {
-      const ethscriptionData = await ethscribeContract.methods.getEthscription(i).call();
-      imagesData.push(ethscriptionData);
+      // Check if the data has the expected structure
+      if (data && data.total_count && data.total_count > 0 && data.items) {
+        // Display images in the grid
+        displayImagesInGrid(data.items);
+      } else {
+        console.error('Invalid data format. Expected structure not found.');
+        alert('Error fetching and displaying images. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error fetching and displaying images:', error);
+      alert('Error fetching and displaying images. Please try again.');
     }
-
-    // Display images in the grid
-    displayImagesInGrid(imagesData);
-  } catch (error) {
-    console.error('Error fetching and displaying images:', error);
-    alert('Error fetching and displaying images. Please try again.');
   }
-}
-
 
   // Updated function to display images in a grid
   function displayImagesInGrid(imagesData) {
