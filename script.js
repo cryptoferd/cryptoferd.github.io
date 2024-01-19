@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // New function to fetch and display images
 async function fetchAndDisplayImages() {
-  console.log('Fetching and displaying images...');
+console.log('Fetching and displaying images...');
   if (web3 && accounts) {
     const ethAddress = accounts[0];
 
