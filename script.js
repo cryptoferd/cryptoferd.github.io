@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const imagePreview = document.getElementById('imagePreview');
   const rainbowizeButton = document.getElementById('rainbowizeButton');
   const resultContainer = document.getElementById('resultContainer');
-  const ethscribeButton = document.getElementById('ethscribeButton');
   const connectWalletButton = document.getElementById('connectWalletButton');
   const disconnectWalletButton = document.getElementById('disconnectWalletButton');
   const colorPickers = document.querySelectorAll('.color-picker');
@@ -20,89 +19,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   imageInput.addEventListener('change', handleImageUpload);
   rainbowizeButton.addEventListener('click', rainbowizeImage);
-  ethscribeButton.addEventListener('click', ethscribeTransaction);
   connectWalletButton.addEventListener('click', connectWallet);
   disconnectWalletButton.addEventListener('click', disconnectWallet);
 
   // Add an event listener to fetch and display images button
   if (fetchImagesButton) {
     fetchImagesButton.addEventListener('click', fetchAndDisplayImages);
-  }
-
-  function enableEthscribeButton() {
-    ethscribeButton.removeAttribute('disabled');
-  }
-
-  async function getNetworkName() {
-    try {
-      const networkId = await web3.eth.net.getId();
-      switch (networkId) {
-        case 1:
-          return 'Mainnet';
-        case 3:
-          return 'Ropsten Testnet';
-        case 4:
-          return 'Rinkeby Testnet';
-        case 42:
-          return 'Kovan Testnet';
-        default:
-          return 'Unknown Network';
-      }
-    } catch (error) {
-      console.error('Error getting network ID:', error);
-      return 'Unknown Network';
-    }
-  }
-
-  async function connectWallet() {
-    console.log('Connect Wallet button clicked!');
-    if (window.ethereum || window.web3) {
-      try {
-        // Modern DApp browsers
-        if (window.ethereum) {
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-          web3 = new Web3(window.ethereum);
-        }
-        // Legacy dApp browsers
-        else if (window.web3) {
-          web3 = new Web3(window.web3.currentProvider);
-        }
-
-        accounts = await web3.eth.getAccounts();
-        const networkName = await getNetworkName();
-
-        // Display wallet address and network info
-        document.getElementById('walletAddress').textContent = `Wallet Address: ${accounts[0]}`;
-        document.getElementById('walletNetwork').textContent = `Network: ${networkName}`;
-        document.getElementById('walletInfoContainer').style.display = 'block';
-
-        // Enable ethscribe button after connecting wallet
-        enableEthscribeButton();
-
-        // Hide Connect Wallet button and show Disconnect Wallet button
-        connectWalletButton.style.display = 'none';
-        disconnectWalletButton.style.display = 'block';
-      } catch (error) {
-        console.error(error);
-        alert('Error connecting to wallet. Please try again.');
-      }
-    } else {
-      alert('No Ethereum wallet found. Please install MetaMask or another wallet provider.');
-    }
-  }
-
-  function disconnectWallet() {
-    // Reset wallet information
-    document.getElementById('walletAddress').textContent = '';
-    document.getElementById('walletBalance').textContent = '';
-    document.getElementById('walletNetwork').textContent = '';
-
-    // Hide wallet information container
-    document.getElementById('walletInfoContainer').style.display = 'none';
-
-    // Show Connect Wallet button and hide Disconnect Wallet button
-    connectWalletButton.style.display = 'block';
-    disconnectWalletButton.style.display = 'none';
   }
 
   function handleImageUpload(event) {
@@ -211,75 +133,76 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  async function ethscribeTransaction() {
-    if (imageInput.files.length === 0) {
-      alert('Please upload an image before ethscribing.');
-      return;
-    }
-
-    const file = imageInput.files[0];
-    const content = await getFileContent(file);
-
-    if (content) {
-      const ethscribeContract = new web3.eth.Contract(ethscribeAbi, ethscribeAddress);
-
-      const gasPrice = await web3.eth.getGasPrice();
-      const gasLimit = 300000;
-
-      const transactionParameters = {
-        from: accounts[0],
-        gas: gasLimit,
-        gasPrice: gasPrice,
-        data: ethscribeContract.methods.ethscribe(content).encodeABI(),
-      };
-
+  async function connectWallet() {
+    console.log('Connect Wallet button clicked!');
+    if (window.ethereum || window.web3) {
       try {
-        const transactionHash = await web3.eth.sendTransaction(transactionParameters);
-        console.log('Transaction hash:', transactionHash);
-        alert('Ethscription successful! Transaction hash: ' + transactionHash);
+        // Modern DApp browsers
+        if (window.ethereum) {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          web3 = new Web3(window.ethereum);
+        }
+        // Legacy dApp browsers
+        else if (window.web3) {
+          web3 = new Web3(window.web3.currentProvider);
+        }
 
-        // Clear the image input and result container after ethscribing
-        imageInput.value = '';
-        resultContainer.innerHTML = '';
+        accounts = await web3.eth.getAccounts();
+        const networkName = await getNetworkName();
+
+        // Display wallet address and network info
+        document.getElementById('walletAddress').textContent = `Wallet Address: ${accounts[0]}`;
+        document.getElementById('walletNetwork').textContent = `Network: ${networkName}`;
+        document.getElementById('walletInfoContainer').style.display = 'block';
+
+        // Hide Connect Wallet button and show Disconnect Wallet button
+        connectWalletButton.style.display = 'none';
+        disconnectWalletButton.style.display = 'block';
       } catch (error) {
-        console.error('Error sending transaction:', error);
-        alert('Error ethscribing. Please try again.');
+        console.error(error);
+        alert('Error connecting to wallet. Please try again.');
       }
+    } else {
+      alert('No Ethereum wallet found. Please install MetaMask or another wallet provider.');
     }
   }
 
-  async function getFileContent(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+  function disconnectWallet() {
+    // Reset wallet information
+    document.getElementById('walletAddress').textContent = '';
+    document.getElementById('walletBalance').textContent = '';
+    document.getElementById('walletNetwork').textContent = '';
 
-      reader.onloadend = function () {
-        const content = reader.result.split(',')[1]; // Exclude the data URI scheme
-        resolve(content);
-      };
+    // Hide wallet information container
+    document.getElementById('walletInfoContainer').style.display = 'none';
 
-      reader.onerror = function (error) {
-        console.error('Error reading file:', error);
-        reject(null);
-      };
-
-      reader.readAsDataURL(file);
-    });
+    // Show Connect Wallet button and hide Disconnect Wallet button
+    connectWalletButton.style.display = 'block';
+    disconnectWalletButton.style.display = 'none';
   }
 
+  // Function to handle image grid display
   async function fetchAndDisplayImages() {
+    // Make API call to fetch data
+    const ethAddress = accounts[0]; // Assuming the connected wallet address is used
+    const apiUrl = `https://api.wgw.lol/v1/mainnet/profiles/${ethAddress}/owned`;
+
     try {
-      // Fetch data from the API using the current connected wallet address
-      const ethAddress = accounts[0]; // Assuming accounts[0] contains the current connected wallet address
-      const apiUrl = `https://api.wgw.lol/v1/mainnet/profiles/${ethAddress}/owned`;
       const response = await fetch(apiUrl);
       const data = await response.json();
 
-      // Check if the data has the expected structure
-      if (data && data.total_count && data.total_count > 0 && data.items) {
+      // Check if the response has the expected structure
+      if (data && data.total_count && data.data) {
+        // Get the total number of images
+        const totalImages = data.total_count;
+
+        // Fetched image data is available in data.data array
+        const imagesData = data.data;
+
         // Display images in the grid
-        displayImagesInGrid(data.items);
+        displayImagesInGrid(imagesData, totalImages);
       } else {
-        console.error('Invalid data format. Expected structure not found.');
+        console.error('Invalid API response format.');
         alert('Error fetching and displaying images. Please try again.');
       }
     } catch (error) {
@@ -288,8 +211,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Updated function to display images in a grid
-  function displayImagesInGrid(imagesData) {
+  // Function to display images in the grid
+  function displayImagesInGrid(imagesData, totalImages) {
     const gridContainer = document.getElementById('imageGridContainer');
 
     // Clear existing grid content
@@ -318,9 +241,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Append the grid cell to the grid container
       gridContainer.appendChild(cell);
     });
+
+    // Ensure the total number of grid cells matches the expected count
+    if (imagesData.length !== totalImages) {
+      console.error('Mismatch in total number of images.');
+      alert('Error fetching and displaying images. Please try again.');
+    }
   }
 
-  // New function to create content element based on data URI
+  // Function to create content element based on data URI
   function createContentElement(contentUri) {
     // Create an element based on the content type
     if (contentUri.startsWith('data:image')) {
@@ -334,6 +263,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       const genericContent = document.createElement('div');
       genericContent.textContent = 'Unsupported Content Type';
       return genericContent;
+    }
+  }
+
+  // Function to get the network name
+  async function getNetworkName() {
+    try {
+      const networkId = await web3.eth.net.getId();
+      switch (networkId) {
+        case 1:
+          return 'Mainnet';
+        case 3:
+          return 'Ropsten Testnet';
+        case 4:
+          return 'Rinkeby Testnet';
+        case 42:
+          return 'Kovan Testnet';
+        default:
+          return 'Unknown Network';
+      }
+    } catch (error) {
+      console.error('Error getting network ID:', error);
+      return 'Unknown Network';
     }
   }
 });
