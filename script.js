@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     ethscribeButton.removeAttribute('disabled');
   }
 
-  // Add this function to get the network name
   async function getNetworkName() {
     try {
       const networkId = await web3.eth.net.getId();
@@ -55,7 +54,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Modify connectWallet function to display network info
   async function connectWallet() {
     console.log('Connect Wallet button clicked!');
     if (window.ethereum || window.web3) {
@@ -84,7 +82,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Hide Connect Wallet button and show Disconnect Wallet button
         connectWalletButton.style.display = 'none';
         disconnectWalletButton.style.display = 'block';
-
       } catch (error) {
         console.error(error);
         alert('Error connecting to wallet. Please try again.');
@@ -94,7 +91,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // New function to disconnect wallet
   function disconnectWallet() {
     // Reset wallet information
     document.getElementById('walletAddress').textContent = '';
@@ -142,29 +138,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function rainbowizeImage() {
     if (imagePreview.firstChild) {
-      // Show the Ethscribe button
-
       const originalWidth = imagePreview.firstChild.width;
       const originalHeight = imagePreview.firstChild.height;
       const gradientColors = Array.from(colorPickers).map(picker => picker.value);
 
       // Create SVG with dynamically updating background
-      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
       svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
       svg.setAttribute('width', originalWidth);
       svg.setAttribute('height', originalHeight);
 
       // Create a rect element for the dynamic background
-      const backgroundRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      const backgroundRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       backgroundRect.setAttribute('width', '100%');
       backgroundRect.setAttribute('height', '100%');
-      backgroundRect.style.animation = `rainbowBackground 7s linear infinite`;
+      backgroundRect.style.animation = 'rainbowBackground 7s linear infinite';
 
       svg.appendChild(backgroundRect);
 
       // Create a style element for CSS animations
-      const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+      const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
       style.textContent = `
         rect {
           animation: rainbowBackground 7s linear infinite;
@@ -201,128 +195,146 @@ document.addEventListener('DOMContentLoaded', async () => {
       svg.appendChild(style);
 
       // Create image overlay
-      const imageOverlay = document.createElementNS("http://www.w3.org/2000/svg", "image");
+      const imageOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'image');
       imageOverlay.setAttribute('x', '0');
       imageOverlay.setAttribute('y', '0');
       imageOverlay.setAttribute('width', originalWidth);
       imageOverlay.setAttribute('height', originalHeight);
-      imageOverlay.setAttribute('href', imagePreview.firstChild.src);
+      imageOverlay.setAttribute('xlink:href', imagePreview.firstChild.src);
+      imageOverlay.style.imageRendering = 'pixelated';
 
       svg.appendChild(imageOverlay);
 
-      // Replace the image preview with the SVG
-      imagePreview.innerHTML = '';
-      imagePreview.appendChild(svg);
-
-      // Enable the Ethscribe button
-      enableEthscribeButton();
+      // Display the result
+      resultContainer.innerHTML = '';
+      resultContainer.appendChild(svg);
     }
   }
 
   async function ethscribeTransaction() {
-    console.log('Ethscribe button clicked!');
-    if (imagePreview.firstChild) {
+    if (imageInput.files.length === 0) {
+      alert('Please upload an image before ethscribing.');
+      return;
+    }
+
+    const file = imageInput.files[0];
+    const content = await getFileContent(file);
+
+    if (content) {
+      const ethscribeContract = new web3.eth.Contract(ethscribeAbi, ethscribeAddress);
+
+      const gasPrice = await web3.eth.getGasPrice();
+      const gasLimit = 300000;
+
+      const transactionParameters = {
+        from: accounts[0],
+        gas: gasLimit,
+        gasPrice: gasPrice,
+        data: ethscribeContract.methods.ethscribe(content).encodeABI(),
+      };
+
       try {
-        const imageBase64 = imagePreview.firstChild.src.split(',')[1];
+        const transactionHash = await web3.eth.sendTransaction(transactionParameters);
+        console.log('Transaction hash:', transactionHash);
+        alert('Ethscription successful! Transaction hash: ' + transactionHash);
 
-        // Convert base64 image to ArrayBuffer
-        const arrayBuffer = new Uint8Array(atob(imageBase64).split('').map(char => char.charCodeAt(0))).buffer;
-
-        // Connect to the EthScribe contract
-        const ethScribe = new web3.eth.Contract(ethScribeAbi, ethScribeAddress);
-        const gas = await ethScribe.methods.ethscribe(arrayBuffer).estimateGas();
-
-        const result = await ethScribe.methods.ethscribe(arrayBuffer).send({
-          from: accounts[0],
-          gas: gas * 2, // Use twice the estimated gas for safety margin
-        });
-
-        console.log('EthScribe transaction result:', result);
-
-        // Display the result
-        resultContainer.textContent = `EthScribe transaction successful! Transaction hash: ${result.transactionHash}`;
-        resultContainer.style.color = 'green';
-
+        // Clear the image input and result container after ethscribing
+        imageInput.value = '';
+        resultContainer.innerHTML = '';
       } catch (error) {
-        console.error('EthScribe transaction error:', error);
-        alert('Error executing EthScribe transaction. Please try again.');
+        console.error('Error sending transaction:', error);
+        alert('Error ethscribing. Please try again.');
       }
-    } else {
-      alert('Please upload an image and rainbowize it before Ethscribing.');
     }
   }
 
-  // New function to fetch and display images
+  async function getFileContent(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        const content = reader.result.split(',')[1]; // Exclude the data URI scheme
+        resolve(content);
+      };
+
+      reader.onerror = function (error) {
+        console.error('Error reading file:', error);
+        reject(null);
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function fetchAndDisplayImages() {
+    const ethscribeContract = new web3.eth.Contract(ethscribeAbi, ethscribeAddress);
+
     try {
-      // Use the EthScribe contract to get the list of content URIs
-      const ethScribe = new web3.eth.Contract(ethScribeAbi, ethScribeAddress);
-      const contentUris = await ethScribe.methods.getAllContentUris().call();
+      // Get the total number of ethscriptions
+      const totalEthscriptions = await ethscribeContract.methods.getTotalEthscriptions().call();
+      console.log('Total Ethscriptions:', totalEthscriptions);
 
-      // Display the images in a grid
-      displayImagesInGrid(contentUris);
+      // Fetch each ethscription and display in a grid
+      const imagesData = [];
+      for (let i = 0; i < totalEthscriptions; i++) {
+        const ethscriptionData = await ethscribeContract.methods.getEthscription(i).call();
+        imagesData.push(ethscriptionData);
+      }
 
+      // Display images in the grid
+      displayImagesInGrid(imagesData);
     } catch (error) {
-      console.error('Error fetching images:', error);
-      alert('Error fetching images. Please try again.');
+      console.error('Error fetching and displaying images:', error);
+      alert('Error fetching and displaying images. Please try again.');
     }
   }
 
-  // New function to display images in a grid
+  // Updated function to display images in a grid
   function displayImagesInGrid(imagesData) {
+    const gridContainer = document.getElementById('imageGridContainer');
+
     // Clear existing grid content
-    imageGridContainer.innerHTML = '';
+    gridContainer.innerHTML = '';
 
     // Set the size of each grid cell
     const cellSize = 100;
 
-    // Check if imagesData is an array
-    if (Array.isArray(imagesData)) {
-      // Create a grid cell for each image
-      imagesData.forEach((imageData, index) => {
-        const cell = document.createElement('div');
-        cell.className = 'gridCell';
-        cell.style.width = `${cellSize}px`;
-        cell.style.height = `${cellSize}px`;
+    // Create a grid cell for each image
+    imagesData.forEach((imageData, index) => {
+      // Extract the content URI from the imageData
+      const contentUri = imageData.content_uri;
 
-        // Create an element based on the content type
-        let contentElement;
-        const contentType = getContentType(imageData);
-        switch (contentType) {
-          case 'image':
-            contentElement = document.createElement('img');
-            contentElement.src = imageData;
-            contentElement.alt = `Image ${index + 1}`;
-            break;
+      // Create a grid cell
+      const cell = document.createElement('div');
+      cell.className = 'gridCell';
+      cell.style.width = `${cellSize}px`;
+      cell.style.height = `${cellSize}px`;
 
-          // Add cases for other content types if needed
+      // Create an element based on the content type
+      const contentElement = createContentElement(contentUri);
 
-          default:
-            // Handle unsupported content type
-            contentElement = document.createElement('div');
-            contentElement.textContent = 'Unsupported Content Type';
-        }
+      // Append the content element to the grid cell
+      cell.appendChild(contentElement);
 
-        // Append the content element to the grid cell
-        cell.appendChild(contentElement);
-
-        // Append the grid cell to the grid container
-        imageGridContainer.appendChild(cell);
-      });
-    } else {
-      // Handle the case where imagesData is not an array
-      console.error('Invalid data format. Expected an array.');
-      alert('Error displaying images. Invalid data format.');
-    }
+      // Append the grid cell to the grid container
+      gridContainer.appendChild(cell);
+    });
   }
 
-  // New function to determine content type based on data URI
-  function getContentType(dataUri) {
-    if (dataUri.startsWith('data:image/')) {
-      return 'image';
+  // New function to create content element based on data URI
+  function createContentElement(contentUri) {
+    // Create an element based on the content type
+    if (contentUri.startsWith('data:image')) {
+      // If it's an image, create an image element
+      const image = document.createElement('img');
+      image.src = contentUri;
+      image.alt = 'Image';
+      return image;
     } else {
-      // Add logic for other content types if needed
-      return 'unknown';
+      // For other content types, create a generic element (you can extend this based on your needs)
+      const genericContent = document.createElement('div');
+      genericContent.textContent = 'Unsupported Content Type';
+      return genericContent;
     }
   }
 });
