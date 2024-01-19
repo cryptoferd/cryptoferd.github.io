@@ -220,6 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Set the size of each grid cell
     const cellSize = 100;
+    const maxImagesPerRow = 5;
 
     // Create a grid cell for each image
     imagesData.forEach((imageData, index) => {
@@ -240,6 +241,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Append the grid cell to the grid container
       gridContainer.appendChild(cell);
+
+      // Add line break after every maxImagesPerRow cells
+      if ((index + 1) % maxImagesPerRow === 0) {
+        gridContainer.appendChild(document.createElement('br'));
+      }
     });
 
     // Ensure the total number of grid cells matches the expected count
@@ -257,6 +263,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const image = document.createElement('img');
       image.src = contentUri;
       image.alt = 'Image';
+      image.style.width = '100%'; // Ensure the image takes the full width of the cell
+      image.style.height = '100%'; // Ensure the image takes the full height of the cell
       return image;
     } else {
       // For other content types, create a generic element (you can extend this based on your needs)
