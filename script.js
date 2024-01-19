@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Display images in the grid
         displayImagesInGrid(imagesData, totalImages);
       } else {
-        console.error('Invalid API response format.');
+        console.error('Invalid API response format:', data);
         alert('Error fetching and displaying images. Please try again.');
       }
     } catch (error) {
@@ -248,6 +248,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
+    // Log information for debugging
+    console.log('Total images according to API response:', totalImages);
+    console.log('Total images displayed in the grid:', imagesData.length);
+
     // Ensure the total number of grid cells matches the expected count
     if (imagesData.length !== totalImages) {
       console.error('Mismatch in total number of images.');
@@ -263,8 +267,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const image = document.createElement('img');
       image.src = contentUri;
       image.alt = 'Image';
-      image.style.width = '100%'; // Ensure the image takes the full width of the cell
-      image.style.height = '100%'; // Ensure the image takes the full height of the cell
       return image;
     } else {
       // For other content types, create a generic element (you can extend this based on your needs)
