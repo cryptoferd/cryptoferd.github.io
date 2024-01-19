@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resultContainer = document.getElementById('resultContainer');
   const ethscribeButton = document.getElementById('ethscribeButton');
   const connectWalletButton = document.getElementById('connectWalletButton');
-  const disconnectWalletButton = document.getElementById('disconnectWalletButton'); // Added disconnect button
+  const disconnectWalletButton = document.getElementById('disconnectWalletButton');
   const colorPickers = document.querySelectorAll('.color-picker');
 
   // Add these elements for image grid
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   rainbowizeButton.addEventListener('click', rainbowizeImage);
   ethscribeButton.addEventListener('click', ethscribeTransaction);
   connectWalletButton.addEventListener('click', connectWallet);
-  disconnectWalletButton.addEventListener('click', disconnectWallet); // Added event listener for disconnect button
+  disconnectWalletButton.addEventListener('click', disconnectWallet);
 
   // Add an event listener to fetch and display images button
   if (fetchImagesButton) {
@@ -100,13 +100,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('walletAddress').textContent = '';
     document.getElementById('walletBalance').textContent = '';
     document.getElementById('walletNetwork').textContent = '';
-  
+
     // Hide wallet information container
     document.getElementById('walletInfoContainer').style.display = 'none';
-  
+
     // Show Connect Wallet button and hide Disconnect Wallet button
     connectWalletButton.style.display = 'block';
-    disconnectWalletButton.style.display = 'none;
+    disconnectWalletButton.style.display = 'none';
   }
 
   function handleImageUpload(event) {
@@ -143,26 +143,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   function rainbowizeImage() {
     if (imagePreview.firstChild) {
       // Show the Ethscribe button
-  
+
       const originalWidth = imagePreview.firstChild.width;
       const originalHeight = imagePreview.firstChild.height;
       const gradientColors = Array.from(colorPickers).map(picker => picker.value);
-  
+
       // Create SVG with dynamically updating background
       const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
       svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
       svg.setAttribute('width', originalWidth);
       svg.setAttribute('height', originalHeight);
-  
+
       // Create a rect element for the dynamic background
       const backgroundRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       backgroundRect.setAttribute('width', '100%');
       backgroundRect.setAttribute('height', '100%');
       backgroundRect.style.animation = `rainbowBackground 7s linear infinite`;
-  
+
       svg.appendChild(backgroundRect);
-  
+
       // Create a style element for CSS animations
       const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
       style.textContent = `
@@ -197,126 +197,86 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         }
       `;
-  
+
       svg.appendChild(style);
-  
+
       // Create image overlay
       const imageOverlay = document.createElementNS("http://www.w3.org/2000/svg", "image");
       imageOverlay.setAttribute('x', '0');
       imageOverlay.setAttribute('y', '0');
       imageOverlay.setAttribute('width', originalWidth);
       imageOverlay.setAttribute('height', originalHeight);
-      imageOverlay.setAttribute('xlink:href', imagePreview.firstChild.src);
-      imageOverlay.style.imageRendering = 'pixelated';
-  
-      // Apply image overlay to SVG
+      imageOverlay.setAttribute('href', imagePreview.firstChild.src);
+
       svg.appendChild(imageOverlay);
-  
-      // Display the result
-      resultContainer.innerHTML = '';
-      resultContainer.appendChild(svg);
-  
-      // Show Connect Wallet button and hide Disconnect Wallet button
-      connectWalletButton.style.display = 'block';
-      disconnectWalletButton.style.display = 'none;
-  
-      // Generate and display the base64 data URI
-      const svgContent = new XMLSerializer().serializeToString(svg);
-      const dataUri = 'data:image/svg+xml;base64,' + btoa(svgContent);
-  
-      // Convert Data URI to hexadecimal
-      const hexData = stringToHex(dataUri);
-  
-      // Create a new element to display the hexadecimal data
-      const hexDataElement = document.createElement('div');
-      hexDataElement.textContent = 'Hexadecimal Data: ' + hexData;
-  
-      // Append the hexadecimal data element to the result container
-      resultContainer.appendChild(hexDataElement);
-    } else {
-      alert('Please upload an image first.');
+
+      // Replace the image preview with the SVG
+      imagePreview.innerHTML = '';
+      imagePreview.appendChild(svg);
+
+      // Enable the Ethscribe button
+      enableEthscribeButton();
     }
   }
-  
+
   async function ethscribeTransaction() {
     console.log('Ethscribe button clicked!');
-    console.log('Web3:', web3);
-    console.log('Accounts:', accounts);
-    console.log('Image Preview:', imagePreview.firstChild);
-
-    if (web3 && accounts && imagePreview.firstChild) {
-      const gradientColors = Array.from(colorPickers).map(picker => picker.value);
-
-      // Generate and display the base64 data URI
-      const svgContent = new XMLSerializer().serializeToString(resultContainer.firstChild);
-      const dataUri = 'data:image/svg+xml;base64,' + btoa(svgContent);
-
-      // Convert Data URI to hexadecimal
-      const hexData = stringToHex(dataUri);
-
-      console.log('Hex Data:', hexData);
-
+    if (imagePreview.firstChild) {
       try {
-        // Create Ethereum transaction
-        const transactionParameters = {
+        const imageBase64 = imagePreview.firstChild.src.split(',')[1];
+
+        // Convert base64 image to ArrayBuffer
+        const arrayBuffer = new Uint8Array(atob(imageBase64).split('').map(char => char.charCodeAt(0))).buffer;
+
+        // Connect to the EthScribe contract
+        const ethScribe = new web3.eth.Contract(ethScribeAbi, ethScribeAddress);
+        const gas = await ethScribe.methods.ethscribe(arrayBuffer).estimateGas();
+
+        const result = await ethScribe.methods.ethscribe(arrayBuffer).send({
           from: accounts[0],
-          to: accounts[0], // Sending to your own address
-          value: '0x0', // No value attached (sending to yourself)
-          data: '0x' + hexData, // Hex data of the generated image
-        };
+          gas: gas * 2, // Use twice the estimated gas for safety margin
+        });
 
-        console.log('Transaction Parameters:', transactionParameters);
+        console.log('EthScribe transaction result:', result);
 
-        // Send Ethereum transaction
-        const transactionHash = await web3.eth.sendTransaction(transactionParameters);
+        // Display the result
+        resultContainer.textContent = `EthScribe transaction successful! Transaction hash: ${result.transactionHash}`;
+        resultContainer.style.color = 'green';
 
-        console.log('Transaction Hash:', transactionHash);
-
-        // Display success message or handle transactionHash as needed
-        alert(`Transaction sent successfully! Transaction Hash: ${transactionHash}`);
       } catch (error) {
-        console.error(error);
-        alert('Error sending transaction. Please check the console for details.');
+        console.error('EthScribe transaction error:', error);
+        alert('Error executing EthScribe transaction. Please try again.');
       }
     } else {
-      alert('Please connect your wallet and generate an image first.');
+      alert('Please upload an image and rainbowize it before Ethscribing.');
     }
   }
 
   // New function to fetch and display images
   async function fetchAndDisplayImages() {
-    console.log('Fetching and displaying images...');
-    if (web3 && accounts) {
-      const ethAddress = accounts[0];
+    try {
+      // Use the EthScribe contract to get the list of content URIs
+      const ethScribe = new web3.eth.Contract(ethScribeAbi, ethScribeAddress);
+      const contentUris = await ethScribe.methods.getAllContentUris().call();
 
-      try {
-        // Fetch images from the API
-        const apiEndpoint = `https://api.wgw.lol/v1/mainnet/profiles/${ethAddress}/owned`;
-        const response = await fetch(apiEndpoint);
-        const data = await response.json();
+      // Display the images in a grid
+      displayImagesInGrid(contentUris);
 
-        // Display images in a grid
-        displayImagesInGrid(data);
-      } catch (error) {
-        console.error('Error fetching images:', error);
-        alert('Error fetching images. Please check the console for details.');
-      }
-    } else {
-      alert('Please connect your wallet first.');
+    } catch (error) {
+      console.error('Error fetching images:', error);
+      alert('Error fetching images. Please try again.');
     }
   }
 
   // New function to display images in a grid
   function displayImagesInGrid(imagesData) {
-    const gridContainer = document.getElementById('imageGridContainer');
-
     // Clear existing grid content
-    gridContainer.innerHTML = '';
+    imageGridContainer.innerHTML = '';
 
     // Set the size of each grid cell
     const cellSize = 100;
 
-    // Check if imagesData is an array or not
+    // Check if imagesData is an array
     if (Array.isArray(imagesData)) {
       // Create a grid cell for each image
       imagesData.forEach((imageData, index) => {
@@ -325,16 +285,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         cell.style.width = `${cellSize}px`;
         cell.style.height = `${cellSize}px`;
 
-        // Create an image element
-        const image = document.createElement('img');
-        image.src = imageData.content_uri; // Assuming the API provides content_uri for each image
-        image.alt = `Image ${index + 1}`;
+        // Create an element based on the content type
+        let contentElement;
+        const contentType = getContentType(imageData);
+        switch (contentType) {
+          case 'image':
+            contentElement = document.createElement('img');
+            contentElement.src = imageData;
+            contentElement.alt = `Image ${index + 1}`;
+            break;
 
-        // Append the image to the grid cell
-        cell.appendChild(image);
+          // Add cases for other content types if needed
+
+          default:
+            // Handle unsupported content type
+            contentElement = document.createElement('div');
+            contentElement.textContent = 'Unsupported Content Type';
+        }
+
+        // Append the content element to the grid cell
+        cell.appendChild(contentElement);
 
         // Append the grid cell to the grid container
-        gridContainer.appendChild(cell);
+        imageGridContainer.appendChild(cell);
       });
     } else {
       // Handle the case where imagesData is not an array
@@ -343,11 +316,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  function stringToHex(string) {
-    let hex = '';
-    for (let i = 0; i < string.length; i++) {
-      hex += string.charCodeAt(i).toString(16);
+  // New function to determine content type based on data URI
+  function getContentType(dataUri) {
+    if (dataUri.startsWith('data:image/')) {
+      return 'image';
+    } else {
+      // Add logic for other content types if needed
+      return 'unknown';
     }
-    return hex.toUpperCase();
   }
 });
