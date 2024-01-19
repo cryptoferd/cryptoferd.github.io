@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
     // Show Connect Wallet button and hide Disconnect Wallet button
     connectWalletButton.style.display = 'block';
-    disconnectWalletButton.style.display = 'none';
+    disconnectWalletButton.style.display = 'none;
   }
 
   function handleImageUpload(event) {
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
       // Show Connect Wallet button and hide Disconnect Wallet button
       connectWalletButton.style.display = 'block';
-      disconnectWalletButton.style.display = 'none';
+      disconnectWalletButton.style.display = 'none;
   
       // Generate and display the base64 data URI
       const svgContent = new XMLSerializer().serializeToString(svg);
@@ -307,41 +307,41 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // New function to display images in a grid
-function displayImagesInGrid(imagesData) {
-  const gridContainer = document.getElementById('imageGridContainer');
+  function displayImagesInGrid(imagesData) {
+    const gridContainer = document.getElementById('imageGridContainer');
 
-  // Clear existing grid content
-  gridContainer.innerHTML = '';
+    // Clear existing grid content
+    gridContainer.innerHTML = '';
 
-  // Set the size of each grid cell
-  const cellSize = 100;
+    // Set the size of each grid cell
+    const cellSize = 100;
 
-  // Check if imagesData is an array or not
-  if (Array.isArray(imagesData)) {
-    // Create a grid cell for each image
-    imagesData.forEach((imageData, index) => {
-      const cell = document.createElement('div');
-      cell.className = 'gridCell';
-      cell.style.width = `${cellSize}px`;
-      cell.style.height = `${cellSize}px`;
+    // Check if imagesData is an array or not
+    if (Array.isArray(imagesData)) {
+      // Create a grid cell for each image
+      imagesData.forEach((imageData, index) => {
+        const cell = document.createElement('div');
+        cell.className = 'gridCell';
+        cell.style.width = `${cellSize}px`;
+        cell.style.height = `${cellSize}px`;
 
-      // Create an image element
-      const image = document.createElement('img');
-      image.src = imageData.content_uri; // Assuming the API provides content_uri for each image
-      image.alt = `Image ${index + 1}`;
+        // Create an image element
+        const image = document.createElement('img');
+        image.src = imageData.content_uri; // Assuming the API provides content_uri for each image
+        image.alt = `Image ${index + 1}`;
 
-      // Append the image to the grid cell
-      cell.appendChild(image);
+        // Append the image to the grid cell
+        cell.appendChild(image);
 
-      // Append the grid cell to the grid container
-      gridContainer.appendChild(cell);
-    });
-  } else {
-    // Handle the case where imagesData is not an array
-    console.error('Invalid data format. Expected an array.');
-    alert('Error displaying images. Invalid data format.');
+        // Append the grid cell to the grid container
+        gridContainer.appendChild(cell);
+      });
+    } else {
+      // Handle the case where imagesData is not an array
+      console.error('Invalid data format. Expected an array.');
+      alert('Error displaying images. Invalid data format.');
+    }
   }
-}
 
   function stringToHex(string) {
     let hex = '';
