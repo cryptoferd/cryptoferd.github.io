@@ -1,87 +1,20 @@
-body {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: #f0f0f0;
-  flex-direction: column;
+/* Basic styling for the grid */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 10px;
+    padding: 20px;
 }
 
-.container {
-  text-align: center;
+/* Styling for the images */
+.grid-container img {
+    width: 72px; /* 24px * 3 */
+    height: 72px; /* 24px * 3 */
+    object-fit: cover;
 }
 
-h1 {
-  font-size: 2em;
-  margin-bottom: 20px;
-}
-
-#imageInput {
-  margin-bottom: 20px;
-}
-
-#imagePreview {
-  margin-bottom: 20px;
-}
-
-#connectWalletButton,
-#disconnectWalletButton,
-#rainbowizeButton {
-  font-size: 1em;
-  padding: 10px 20px;
-  margin-top: 10px;
-  cursor: pointer;
-}
-
-#connectWalletButton {
-  background-color: #3498db;
-  color: white;
-  border: none;
-}
-
-#disconnectWalletButton {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-}
-
-#rainbowizeButton {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-}
-
-#walletInfoContainer {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  text-align: right;
-  display: flex;
-  flex-direction: column;
-}
-
-#resultContainer {
-  margin-top: 20px;
-}
-
-.gridCell {
-  width: 100px;
-  height: 100px;
-  margin: 5px;
-  overflow: hidden;
-}
-
-#imageGridContainer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-img {
-  width: 100%;
-  height: auto;
-  image-rendering: pixelated;
+/* Styling for the titles */
+.grid-container .image-title {
+    font-size: 14px;
+    text-align: center;
 }
